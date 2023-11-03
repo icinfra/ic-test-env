@@ -22,7 +22,7 @@ provider "proxmox" {
 
 resource "proxmox_vm_qemu" "squid_proxy" {
   vmid        = var.vm_id_4_squid
-  name        = "online-vm-${var.vm_id_4_squid}-squid-proxy.icinfra.cn"
+  name        = "online-vm-${var.vm_id_4_squid}-squid-proxy.${var.domain}"
   desc        = "IC vms"
   target_node = "pve"
   os_type     = "cloud-init"
@@ -91,7 +91,7 @@ resource "proxmox_vm_qemu" "nfs" {
   depends_on = [proxmox_vm_qemu.squid_proxy]
 
   vmid        = var.vm_id_4_nfs
-  name        = "offline-vm-${var.vm_id_4_nfs}-nfs.icinfra.cn"
+  name        = "offline-vm-${var.vm_id_4_nfs}-nfs.${var.domain}"
   desc        = "IC vms"
   target_node = "pve"
 
@@ -145,7 +145,7 @@ resource "proxmox_vm_qemu" "freeipa" {
     proxmox_vm_qemu.nfs
   ]
   vmid        = var.vm_id_4_freeipa
-  name        = "offline-vm-${var.vm_id_4_freeipa}-ipa-01.icinfra.cn"
+  name        = "offline-vm-${var.vm_id_4_freeipa}-ipa-01.${var.domain}"
   desc        = "IC vms"
   target_node = "pve"
 
@@ -179,10 +179,10 @@ resource "proxmox_vm_qemu" "freeipa" {
       "sudo mount /tools",
       "sudo umount -l /home",
       "sudo mount /home",
-      "echo '${var.vm_ip_prefix}.${var.vm_id_4_freeipa} ipa-server-01.icinfra.cn' | sudo tee -a /etc/hosts",
+      "echo '${var.vm_ip_prefix}.${var.vm_id_4_freeipa} ipa-server-01.${var.domain}' | sudo tee -a /etc/hosts",
       "cd",
       "sudo yum install -y ipa-server ipa-server-dns",
-      "sudo ipa-server-install --setup-dns --allow-zone-overlap --hostname=ipa-server-01.icinfra.cn --domain=icinfra.cn --realm=ICINFRA.CN --ds-password=12345678 --admin-password=12345678 --no-forwarders --auto-reverse --unattended",
+      "sudo ipa-server-install --setup-dns --allow-zone-overlap --hostname=ipa-server-01.${var.domain} --domain=${var.domain} --realm=ICINFRA.CN --ds-password=12345678 --admin-password=12345678 --no-forwarders --auto-reverse --unattended",
       "sudo systemctl enable firewalld --now",
       "sudo firewall-cmd --add-port=80/tcp --add-port=443/tcp --add-port=389/tcp --add-port=636/tcp --add-port=88/tcp --add-port=464/tcp --add-port=53/tcp --add-port=88/udp --add-port=464/udp --add-port=53/udp --add-port=123/udp --permanent",
       "sudo firewall-cmd --reload",
@@ -209,7 +209,7 @@ resource "proxmox_vm_qemu" "computing" {
     proxmox_vm_qemu.freeipa,
   ]
   vmid        = var.vm_id_start + count.index
-  name        = "offline-vm-${var.vm_id_start + count.index}-computing.icinfra.cn"
+  name        = "offline-vm-${var.vm_id_start + count.index}-computing.${var.domain}"
   desc        = "IC vms"
   target_node = "pve"
 
@@ -245,10 +245,10 @@ resource "proxmox_vm_qemu" "computing" {
       "sudo mount /tools",
       "sudo umount -l /home",
       "sudo mount /home",
-      "echo '${var.vm_ip_prefix}.${var.vm_id_4_freeipa} ipa-server-01.icinfra.cn' | sudo tee -a /etc/hosts",
+      "echo '${var.vm_ip_prefix}.${var.vm_id_4_freeipa} ipa-server-01.${var.domain}' | sudo tee -a /etc/hosts",
       "cd",
       "sudo yum install -y ipa-client",
-      "sudo ipa-client-install --server=ipa-server-01.icinfra.cn --domain=icinfra.cn --realm=ICINFRA.CN --principal=admin --password=12345678 --unattended",
+      "sudo ipa-client-install --server=ipa-server-01.${var.domain} --domain=${var.domain} --realm=ICINFRA.CN --principal=admin --password=12345678 --unattended",
     ]
     connection {
       type        = "ssh"

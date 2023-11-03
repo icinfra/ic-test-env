@@ -10,6 +10,10 @@ variable "template" {
   default = "CentOS7-tmpl-cloudinit-gui-5.4.258-firefox-and-chinese"
 }
 
+variable "domain" {
+  default = "icinfra.cn"
+}
+
 variable "vm_ip_prefix" {
   default = "172.16.0"
 }
